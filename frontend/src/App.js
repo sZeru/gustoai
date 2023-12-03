@@ -15,7 +15,7 @@ import History from './pages/history';
 import Profile from './pages/profile';
 import useToken from './useToken';
 import ProtectedRoute from './ProtectedRoute';
-
+import ChangePassword from './pages/changePassword';
 
 function App() {
   const { removeToken, setToken } = useToken();
@@ -32,6 +32,8 @@ function App() {
                     <Route path="/pantry" element={<ProtectedRoute> <Pantry /> </ProtectedRoute>} />
                     <Route path="/history" element={<ProtectedRoute> <History /> </ProtectedRoute>} />
                     <Route path="/profile" element={<ProtectedRoute><Profile removeToken={removeToken} /></ProtectedRoute>} />
+                    <Route path="/changePassword" element ={<ProtectedRoute> <ChangePassword /> </ProtectedRoute>} />
+
                 </Routes>
             </div>
         </BrowserRouter>
