@@ -128,3 +128,63 @@ def toggle_favorite(item_id):
     db.session.commit()
     return jsonify(item.to_dict()), 200
 
+#change password
+@app.route("/changePassword", methods=["POST"])
+@jwt_required()
+def changePassword():
+
+    try:
+        # Extract JSON data from the request
+        data = request.json
+
+        # Get the user ID from the JWT token
+        current_user_id = get_jwt_identity()
+
+        # Retrieve the user from the database based on the user ID
+        user = User.query.get(current_user_id)
+
+        # Update the user's password
+        user.password = data['new_password']
+
+        hashed_password = generate_password_hash( user.password)
+        user.password = hashed_password
+        # Commit the changes to the database
+        db.session.commit()
+
+        # Return a success response
+        return jsonify({"success": True, "response": "Password updated"}), 200
+
+    except Exception as e:
+        # Handle any exceptions that might occur
+        print("Error:", str(e))
+        return jsonify({"success": False, "response": str(e)}), 500 
+
+
+#change username
+@app.route("/changeUsername", methods=["POST"])
+@jwt_required()
+def changeUsername():
+
+    try:
+        # Extract JSON data from the request
+        data = request.json
+
+        # Get the user ID from the JWT token
+        current_user_id = get_jwt_identity()
+
+        # Retrieve the user from the database based on the user ID
+        user = User.query.get(current_user_id)
+
+        user.username = data['new_Username']
+
+
+        # Commit the changes to the database
+        db.session.commit()
+
+        # Return a success response
+        return jsonify({"success": True, "response": "Username updated"}), 200
+
+    except Exception as e:
+        # Handle any exceptions that might occur
+        print("Error:", str(e))
+        return jsonify({"success": False, "response": str(e)}), 500
