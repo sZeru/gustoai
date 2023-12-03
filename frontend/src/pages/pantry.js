@@ -384,7 +384,6 @@ const toggleFavorite = async (itemId, isFavorite) => {
                 style={{ backgroundColor: 'transparent', border: 'none', cursor: 'pointer' }}>
           {item.favorite ? '★' : '☆'}
         </button>
-          
                   </div>
                 ))}
               </div>
