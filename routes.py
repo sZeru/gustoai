@@ -97,6 +97,7 @@ def get_pantry_items():
     items = PantryItem.query.filter_by(user_id=current_user_id).all()
     return jsonify([item.to_dict() for item in items])
 
+
 #delete ingredient
 @app.route('/pantry/<int:item_id>', methods=['DELETE'])
 @jwt_required()
@@ -188,3 +189,13 @@ def changeUsername():
         # Handle any exceptions that might occur
         print("Error:", str(e))
         return jsonify({"success": False, "response": str(e)}), 500
+
+#get pantry item names for recipe generation
+@app.route('/pantry/names', methods=['GET'])
+@jwt_required()
+def get_pantry_item_names():
+    current_user_id = get_jwt_identity()
+    names = PantryItem.query.with_entities(PantryItem.ingredient_name).filter_by(user_id=current_user_id).all()
+    #return names
+    return jsonify([tuple(name) for name in names])
+
