@@ -190,12 +190,41 @@ def changeUsername():
         print("Error:", str(e))
         return jsonify({"success": False, "response": str(e)}), 500
 
-#get pantry item names for recipe generation
-@app.route('/pantry/names', methods=['GET'])
+#select items for recipe generation
+@app.route("/mainpage/select", methods=["PATCH"])
 @jwt_required()
-def get_pantry_item_names():
-    current_user_id = get_jwt_identity()
-    names = PantryItem.query.with_entities(PantryItem.ingredient_name).filter_by(user_id=current_user_id).all()
-    #return names
-    return jsonify([tuple(name) for name in names])
+def select_item():
+    try:
+        data = request.json
+        ingredient_name = data['ingredient_name']
+        selected = data['selected']
+        current_user_id = get_jwt_identity()
 
+        item = PantryItem.query.filter_by(user_id=current_user_id, ingredient_name=ingredient_name).first()
+        if not item:
+            return jsonify({"message": "Item not found"}), 404
+        item.selected = selected
+        db.session.commit()
+        return jsonify({"success": True, "response": "Item updated"}), 200
+    
+    except Exception as e:
+        print("Error:", str(e))
+        return jsonify({"success": False, "response": str(e)}), 500
+    
+@app.route('/mainpage/bulk-update', methods=['PATCH'])
+@jwt_required()
+def bulk_update_pantry_items():
+    user_id = get_jwt_identity()
+    try:
+        data = request.json
+        item_ids = data.get('item_ids')
+        new_selected_status = data.get('selected') 
+        print(new_selected_status)
+
+        # Update the selected status for all items in item_ids
+        PantryItem.query.filter(PantryItem.id.in_(item_ids), PantryItem.user_id == user_id).update({'selected': new_selected_status}, synchronize_session=False)
+        db.session.commit()
+
+        return jsonify({"success": True, "message": "Items updated"}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500

@@ -24,6 +24,7 @@ class PantryItem(db.Model):
     unit = db.Column(db.String(50))
     category = db.Column(db.String(100)) 
     favorite = db.Column(db.Boolean, default=False)
+    selected = db.Column(db.Boolean, default=False)
 
     def to_dict(self):
         return {
@@ -33,7 +34,8 @@ class PantryItem(db.Model):
             "quantity": self.quantity,
             "unit": self.unit,
             "category": self.category,
-            "favorite": self.favorite
+            "favorite": self.favorite,
+            "selected": self.selected
         }
 
 

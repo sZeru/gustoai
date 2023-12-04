@@ -7,21 +7,69 @@ function MainPage() {
   const [course, setCourse] = useState("");
   const [cuisine, setCuisine] = useState("");
   const [recipeTime, setRecipeTime] = useState("");
-  const [numServings, setNumServings] = useState("");
-  const [pantryItemNames, setPantryItemNames] = useState([]);
+  const [pantryItems, setPantryItems] = useState([]);
 
-  axios
-    .get("http://127.0.0.1:5000/mainpage", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    .then((response) => {
-      console.log(response.data);
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-    });
+  const handleCheckboxChange = async (item, isChecked) => {
+    try {
+      console.log(+isChecked);
+      await axios.patch(`http://127.0.0.1:5000/mainpage/select`,
+        {
+          ingredient_name: item.ingredient_name,
+          selected: +isChecked
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      const updatedItems = pantryItems.map((i) => {
+        if (i.ingredient_name === item.ingredient_name) {
+          return { ...i, selected: +isChecked };
+        }
+        return i;
+      });
+      setPantryItems(updatedItems);
+    } catch (error) {
+      console.error("Error updating item:", error);
+    }
+  };
+
+  const updateBackendSelectedStatus = async (itemIds, selectedStatus) => {
+    console.log(itemIds);
+    try {
+      await axios.patch('http://127.0.0.1:5000/mainpage/bulk-update', {
+        item_ids: itemIds,
+        selected: selectedStatus
+      }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+      });
+    } catch (error) {
+      console.error("Error updating items:", error);
+    }
+  };
+
+  const selectAllItems = () => {
+    const updatedItems = pantryItems.map(item => ({ ...item, selected: 1 }));
+    setPantryItems(updatedItems);
+
+    const itemIds = pantryItems.map(item => item.id);
+    updateBackendSelectedStatus(itemIds, 1);
+    console.log(itemIds);
+  };
+
+  const clearAllItems = () => {
+    const updatedItems = pantryItems.map(item => ({ ...item, selected: 0 }));
+    setPantryItems(updatedItems);
+
+    const itemIds = pantryItems.map(item => item.id);
+    updateBackendSelectedStatus(itemIds, 0);
+    console.log(itemIds);
+
+  };
+
 
   const handleCourseChange = async (e) => {
     const value = e.target.value;
@@ -38,14 +86,10 @@ function MainPage() {
     setRecipeTime(value);
   };
 
-  const handleServingsChange = async (e) => {
-    const value = e.target.value;
-    setNumServings(value);
-  };
 
-  const fetchPantryItemNames = async () => {
+  const fetchPantryItems = async () => {
     try {
-      const response = await axios.get("http://127.0.0.1:5000/pantry/names", {
+      const response = await axios.get("http://127.0.0.1:5000/pantry", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -58,13 +102,61 @@ function MainPage() {
   };
 
   useEffect(() => {
-    const loadPantryItemNames = async () => {
-      const itemNames = await fetchPantryItemNames();
-      setPantryItemNames(itemNames);
+    const loadPantryItems = async () => {
+      const items = await fetchPantryItems();
+      setPantryItems(items);
     };
 
-    loadPantryItemNames();
+    loadPantryItems();
   }, []);
+
+  const generateRecipe = async () => {
+    const selectedIngredients = pantryItems
+      .filter(item => item.selected === 1)
+      .map(item => item.ingredient_name);
+  
+    const ingredientsQuery = selectedIngredients.join(', ');
+      const params = {
+      q: ingredientsQuery,
+      type: 'public',
+      app_id: process.env.REACT_APP_RECIPE_API_ID,
+      app_key: process.env.REACT_APP_RECIPE_API_KEY,
+      ingr: selectedIngredients.length + 2,
+      imageSize: 'REGULAR',
+      field: ('image', 'source', 'dietLabels', 'ingredients', 'ingredientLines', 'totalTime', 'cuisineType', 'mealType', 'totalNutrients')
+    };
+    if (course !== 'any') {
+      params.mealType = course;
+    }
+    if (cuisine !== 'any') {
+      params.cuisineType = cuisine;
+    }
+    if (recipeTime !== 'any') {
+      if (recipeTime == '5 minutes or less') {
+        params.time = 5;
+      } else if (recipeTime == '10 minutes or less') {
+        params.time = 10;
+      } else if (recipeTime == '30 minutes or less') {
+        params.time = 30;
+      } else if (recipeTime == '1 hour or less') {
+        params.time = 60;
+      } else if (recipeTime == '1 hour or more') {
+        params.time = '60%2B';
+      }
+    }
+    console.log(params);
+    try {
+      const response = await axios.get("https://api.edamam.com/api/recipes/v2?"
+      + "app_id=" +
+      process.env.REACT_APP_RECIPE_API_ID +
+      "&app_key=" +
+      process.env.REACT_APP_RECIPE_API_KEY, { params });
+      console.log(response.data); // Handle the response data as needed
+    } catch (error) {
+      console.error("Error fetching recipes:", error);
+    }
+  };
+  
 
   return (
     <div>
@@ -77,9 +169,11 @@ function MainPage() {
         onChange={(e) => setCourse(e.target.value)}
       >
         <option value="">Select Course</option>
-        <option value="appetizer">Appetizer</option>
-        <option value="main course">Main Course</option>
-        <option value="dessert">Dessert</option>
+        <option value="any">Any</option>
+        <option value="breakfast">Breakfast</option>
+        <option value="dinner">Dinner</option>
+        <option value="lunch">Lunch</option>
+        <option value="snack">Snack</option>
       </select>
 
       <select
@@ -88,17 +182,25 @@ function MainPage() {
         onChange={(e) => setCuisine(e.target.value)}
       >
         <option value="">Select Cuisine</option>
+        <option value="any">Any</option>
         <option value="American">American</option>
-        <option value="Chinese">Chinese</option>
-        <option value="Cuban">Cuban</option>
-        <option value="Greek">Greek</option>
-        <option value="Indian">Indian</option>
+        <option value="South American">South American</option>
+        <option value="Mediterranean">Mediterranean</option>
+        <option value="Caribbean">Caribbean</option>
+        <option value="British">British</option>
+        <option value="Centrap Europe">Central Europe</option>
+        <option value="Easter Europe">Eastern Europe</option>
+        <option value="Khoser">Khoser</option>
+        <option value="French">French</option>
         <option value="Italian">Italian</option>
-        <option value="Japanese">Japanese</option>
-        <option value="Korean">Korean</option>
+        <option value="Middle Eastern">Middle Eastern</option>
         <option value="Mexican">Mexican</option>
-        <option value="Thai">Thai</option>
-        <option value="Vietnamese">Vietnamese</option>
+        <option value="Asian">Asian</option>
+        <option value="South East Asian">South East Asian</option>
+        <option value="Chinese">Chinese</option>
+        <option value="Indian">Indian</option>
+        <option value="Japanese">Japanese</option>
+        <option value="Nordic">Nordic</option>
       </select>
 
       <select
@@ -107,6 +209,7 @@ function MainPage() {
         onChange={(e) => setRecipeTime(e.target.value)}
       >
         <option value="">Time for Recipe</option>
+        <option value="any">Any</option>
         <option value="5 minutes or less">5 minutes or less</option>
         <option value="10 minutes or less">10 minutes or less</option>
         <option value="30 minutes or less">30 minutes or less</option>
@@ -114,36 +217,41 @@ function MainPage() {
         <option value="1 hour or more">1 hour or more</option>
       </select>
 
-      <input
-        style={{ marginRight: 10, width: 150 }}
-        type="text"
-        value={numServings}
-        onChange={(e) => setNumServings(e.target.value)}
-        placeholder="Enter # of Servings"
-      />
-
       <div className="list">
-        <div className="title" style={{ marginTop: 10 }}>
+        <h5 className="title" style={{ marginTop: 10 }}>
           Your pantry items:
-        </div>
+        </h5>
         <div className="form-check">
+          <div style = {{marginRight: '20px'}}>
+            <button style = {{marginRight: '10px'}}onClick={selectAllItems}>Select All</button>
+            <button onClick={clearAllItems}>Clear All</button>
+          </div>
           <table width="100%" align="center">
-            <tr>
-              <td>
-                {pantryItemNames.map((item, index) => (
-                  <div key={index}>
-                    <input value={item} type="checkbox" id="flexCheckDefault" />
-                    <label class="form-check-label" for="flexCheckDefault">
-                      <span>&nbsp;&nbsp;&nbsp;{item}</span>
-                    </label>
-                  </div>
-                ))}
-              </td>
-            </tr>
+            <tbody>
+              {pantryItems.map((item, index) => (
+                <tr key={index}>
+                  <td>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id={`checkbox-${index}`}
+                        checked={item.selected === 1}
+                        onChange={(e) => handleCheckboxChange(item, e.target.checked)}
+                      />
+                      <label className="form-check-label" htmlFor={`checkbox-${index}`}>
+                        <span>&nbsp;&nbsp;&nbsp;{item.ingredient_name} ({item.quantity} {item.unit})</span>
+                      </label>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
           </table>
+          <button onClick={generateRecipe}>Generate Recipe</button>
         </div>
       </div>
     </div>
+
   );
 }
 

@@ -57,7 +57,7 @@ const fetchSuggestions = async (query, setSuggestionsCallback) => {
   const options = {
     method: "GET",
     url: "https://edamam-food-and-grocery-database.p.rapidapi.com/auto-complete",
-    params: { q: query, limit: "5" },
+    params: { q: query, limit: "8" },
     headers: {
       "X-RapidAPI-Key": process.env.REACT_APP_RAPIDAPI_KEY,
       "X-RapidAPI-Host": "edamam-food-and-grocery-database.p.rapidapi.com",
@@ -100,8 +100,9 @@ const fetchFoodId = async (ingredientName) => {
     );
     const foodId = response.data.hints[0]?.food?.foodId;
     const foodImg = response.data.hints[0]?.food?.image;
+    const measures = response.data.hints[0]?.measures;
     console.log(foodId);
-    return { foodId, foodImg };
+    return { foodId, foodImg, measures };
   } catch (error) {
     console.error("Error fetching foodId:", error);
     return null;
@@ -121,23 +122,16 @@ const Pantry = () => {
   const [selectedUnit, setSelectedUnit] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [foodImg, setFoodImg] = useState(null);
+  const [isIngredientSelected, setIsIngredientSelected] = useState(false);
+  const [hasUnitMeasure, setHasUnitMeasure] = useState(false);
+
 
   const measureURIMap = {
+    unit: "http://www.edamam.com/ontologies/edamam.owl#Measure_unit",
     oz: "http://www.edamam.com/ontologies/edamam.owl#Measure_ounce",
     g: "http://www.edamam.com/ontologies/edamam.owl#Measure_gram",
     lb: "http://www.edamam.com/ontologies/edamam.owl#Measure_pound",
     kg: "http://www.edamam.com/ontologies/edamam.owl#Measure_kilogram",
-    pinch: "http://www.edamam.com/ontologies/edamam.owl#Measure_pinch",
-    L: "http://www.edamam.com/ontologies/edamam.owl#Measure_liter",
-    "fl oz": "http://www.edamam.com/ontologies/edamam.owl#Measure_fluid_ounce",
-    gal: "http://www.edamam.com/ontologies/edamam.owl#Measure_gallon",
-    pt: "http://www.edamam.com/ontologies/edamam.owl#Measure_pint",
-    qt: "http://www.edamam.com/ontologies/edamam.owl#Measure_quart",
-    mL: "http://www.edamam.com/ontologies/edamam.owl#Measure_milliliter",
-    drop: "http://www.edamam.com/ontologies/edamam.owl#Measure_drop",
-    cup: "http://www.edamam.com/ontologies/edamam.owl#Measure_cup",
-    tbsp: "http://www.edamam.com/ontologies/edamam.owl#Measure_tablespoon",
-    tsp: "http://www.edamam.com/ontologies/edamam.owl#Measure_teaspoon",
   };
 
   const groupByCategory = (items) => {
@@ -164,6 +158,7 @@ const Pantry = () => {
   const handleIngredientChange = async (e) => {
     const value = e.target.value;
     setIngredientName(value);
+    setIsIngredientSelected(false);
     if (value.length >= 2) {
       debouncedFetchSuggestions(value, setSuggestions);
     } else {
@@ -171,6 +166,15 @@ const Pantry = () => {
     }
   };
 
+  const handleAutocompleteClick = async (suggestion) => {
+    setIngredientName(suggestion);
+    setSuggestions([]);
+    setIsIngredientSelected(true);
+    const { measures } = await fetchFoodId(suggestion);
+    const hasUnitMeasure = measures.some(measure => measure.uri === "http://www.edamam.com/ontologies/edamam.owl#Measure_unit");
+    setHasUnitMeasure(hasUnitMeasure);
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage(" ");
@@ -182,6 +186,10 @@ const Pantry = () => {
     const numericQuantity = Number(quantity);
     if (isNaN(numericQuantity) || numericQuantity <= 0) {
       setErrorMessage("Quantity must be a number");
+      return;
+    }
+    if (!isIngredientSelected) {
+      setErrorMessage("Please select a valid ingredient");
       return;
     }
 
@@ -280,13 +288,13 @@ const Pantry = () => {
 
   const extractNutritionInfo = (data) => {
     return {
-      calories: Math.round(data.totalNutrients.ENERC_KCAL?.quantity),
-      carbs: Math.round(data.totalNutrients.CHOCDF?.quantity),
-      fat: Math.round(data.totalNutrients.FAT?.quantity),
-      protein: Math.round(data.totalNutrients.PROCNT?.quantity),
-      sugar: Math.round(data.totalNutrients.SUGAR?.quantity),
-      sodium: Math.round(data.totalNutrients.NA?.quantity),
-      cholesterol: Math.round(data.totalNutrients.CHOLE?.quantity),
+      calories: Math.round(data.totalNutrients.ENERC_KCAL?.quantity) || 0,
+      carbs: Math.round(data.totalNutrients.CHOCDF?.quantity) || 0,
+      fat: Math.round(data.totalNutrients.FAT?.quantity) || 0,
+      protein: Math.round(data.totalNutrients.PROCNT?.quantity) || 0,
+      sugar: Math.round(data.totalNutrients.SUGAR?.quantity) || 0,
+      sodium: Math.round(data.totalNutrients.NA?.quantity) || 0,
+      cholesterol: Math.round(data.totalNutrients.CHOLE?.quantity) || 0,
     };
   };
 
@@ -348,6 +356,7 @@ const Pantry = () => {
                   key={index}
                   style={{ padding: "10px", cursor: "pointer" }}
                   onClick={() => {
+                    handleAutocompleteClick(suggestion);
                     setIngredientName(suggestion);
                     setSuggestions([]);
                   }}
@@ -369,22 +378,13 @@ const Pantry = () => {
             value={unit}
             onChange={(e) => setUnit(e.target.value)}
           >
+
             <option value="">Select Unit</option>
+            {hasUnitMeasure && <option value="unit">{ingredientName}</option>}
             <option value="g">Gram</option>
             <option value="oz">Ounce</option>
             <option value="lb">Pound</option>
             <option value="kg">Kilogram</option>
-            <option value="pinch">Pinch</option>
-            <option value="L">Liter</option>
-            <option value="fl oz">Fluid ounce</option>
-            <option value="gal">Gallon</option>
-            <option value="pt">Pint</option>
-            <option value="qt">Quart</option>
-            <option value="mL">Mililiter</option>
-            <option value="drops">Drop</option>
-            <option value="cup">Cup</option>
-            <option value="tbsp">Tablespoon</option>
-            <option value="tsp">Teaspoon</option>
           </select>
           <select
             style={{ marginRight: 10, height: 30 }}
@@ -464,11 +464,12 @@ const Pantry = () => {
               <h4 style={{ borderBottom: "1px solid black" }}>
                 Nutrition Information
               </h4>
-              <img
+              {foodImg && (<img
                 alt="food image"
+                loading="lazy"
                 src={foodImg}
                 style={{ maxWidth: "50%", height: "auto" }}
-              />
+              />)}
               <h5>
                 <strong>
                   {selectedItem} - {selectedQuantity} {selectedUnit}
