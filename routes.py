@@ -97,6 +97,7 @@ def get_pantry_items():
     items = PantryItem.query.filter_by(user_id=current_user_id).all()
     return jsonify([item.to_dict() for item in items])
 
+
 #delete ingredient
 @app.route('/pantry/<int:item_id>', methods=['DELETE'])
 @jwt_required()
@@ -128,3 +129,102 @@ def toggle_favorite(item_id):
     db.session.commit()
     return jsonify(item.to_dict()), 200
 
+#change password
+@app.route("/changePassword", methods=["POST"])
+@jwt_required()
+def changePassword():
+
+    try:
+        # Extract JSON data from the request
+        data = request.json
+
+        # Get the user ID from the JWT token
+        current_user_id = get_jwt_identity()
+
+        # Retrieve the user from the database based on the user ID
+        user = User.query.get(current_user_id)
+
+        # Update the user's password
+        user.password = data['new_password']
+
+        hashed_password = generate_password_hash( user.password)
+        user.password = hashed_password
+        # Commit the changes to the database
+        db.session.commit()
+
+        # Return a success response
+        return jsonify({"success": True, "response": "Password updated"}), 200
+
+    except Exception as e:
+        # Handle any exceptions that might occur
+        print("Error:", str(e))
+        return jsonify({"success": False, "response": str(e)}), 500 
+
+
+#change username
+@app.route("/changeUsername", methods=["POST"])
+@jwt_required()
+def changeUsername():
+
+    try:
+        # Extract JSON data from the request
+        data = request.json
+
+        # Get the user ID from the JWT token
+        current_user_id = get_jwt_identity()
+
+        # Retrieve the user from the database based on the user ID
+        user = User.query.get(current_user_id)
+
+        user.username = data['new_Username']
+
+
+        # Commit the changes to the database
+        db.session.commit()
+
+        # Return a success response
+        return jsonify({"success": True, "response": "Username updated"}), 200
+
+    except Exception as e:
+        # Handle any exceptions that might occur
+        print("Error:", str(e))
+        return jsonify({"success": False, "response": str(e)}), 500
+
+#select items for recipe generation
+@app.route("/mainpage/select", methods=["PATCH"])
+@jwt_required()
+def select_item():
+    try:
+        data = request.json
+        ingredient_name = data['ingredient_name']
+        selected = data['selected']
+        current_user_id = get_jwt_identity()
+
+        item = PantryItem.query.filter_by(user_id=current_user_id, ingredient_name=ingredient_name).first()
+        if not item:
+            return jsonify({"message": "Item not found"}), 404
+        item.selected = selected
+        db.session.commit()
+        return jsonify({"success": True, "response": "Item updated"}), 200
+    
+    except Exception as e:
+        print("Error:", str(e))
+        return jsonify({"success": False, "response": str(e)}), 500
+    
+@app.route('/mainpage/bulk-update', methods=['PATCH'])
+@jwt_required()
+def bulk_update_pantry_items():
+    user_id = get_jwt_identity()
+    try:
+        data = request.json
+        item_ids = data.get('item_ids')
+        new_selected_status = data.get('selected') 
+        print(new_selected_status)
+
+        # Update the selected status for all items in item_ids
+        PantryItem.query.filter(PantryItem.id.in_(item_ids), PantryItem.user_id == user_id).update({'selected': new_selected_status}, synchronize_session=False)
+        db.session.commit()
+
+        return jsonify({"success": True, "message": "Items updated"}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
