@@ -1,0 +1,15 @@
+.recipes-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Three columns */
+    gap: 10px; /* Space between cards */
+    padding: 10px; /* Padding around the grid */
+  }
+  
+  .recipe-card {
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    box-sizing: border-box;
+    text-align: center;
+  }
+  
