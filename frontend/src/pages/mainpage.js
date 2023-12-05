@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from "react";
 import "../css/mainpage.css";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function MainPage() {
+  const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const [course, setCourse] = useState("");
   const [cuisine, setCuisine] = useState("");
   const [recipeTime, setRecipeTime] = useState("");
   const [pantryItems, setPantryItems] = useState([]);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [recipes, setRecipes] = useState(null);
 
   const handleCheckboxChange = async (item, isChecked) => {
     try {
@@ -70,23 +74,6 @@ function MainPage() {
 
   };
 
-
-  const handleCourseChange = async (e) => {
-    const value = e.target.value;
-    setCourse(value);
-  };
-
-  const handleCuisineChange = async (e) => {
-    const value = e.target.value;
-    setCuisine(value);
-  };
-
-  const handleTimeChange = async (e) => {
-    const value = e.target.value;
-    setRecipeTime(value);
-  };
-
-
   const fetchPantryItems = async () => {
     try {
       const response = await axios.get("http://127.0.0.1:5000/pantry", {
@@ -114,16 +101,25 @@ function MainPage() {
     const selectedIngredients = pantryItems
       .filter(item => item.selected === 1)
       .map(item => item.ingredient_name);
-  
-    const ingredientsQuery = selectedIngredients.join(', ');
+
+      if (selectedIngredients.length === 0) {
+        setErrorMessage("Please select at least one ingredient");
+        return;
+      }
+      if (course === '' || cuisine === '' || recipeTime === '') {
+        setErrorMessage("Please select all options");
+        return;
+      }
+      
+      const fields = ['image', 'source', 'dietLabels', 'ingredients', 'ingredientLines', 'totalTime', 'cuisineType', 'mealType', 'totalNutrients', 'url', 'label'];
+      const ingredientsQuery = selectedIngredients.join(', ');
       const params = {
       q: ingredientsQuery,
       type: 'public',
       app_id: process.env.REACT_APP_RECIPE_API_ID,
       app_key: process.env.REACT_APP_RECIPE_API_KEY,
-      ingr: selectedIngredients.length + 2,
-      imageSize: 'REGULAR',
-      field: ('image', 'source', 'dietLabels', 'ingredients', 'ingredientLines', 'totalTime', 'cuisineType', 'mealType', 'totalNutrients')
+      ingr: selectedIngredients.length + 1,
+      imageSize: 'SMALL',
     };
     if (course !== 'any') {
       params.mealType = course;
@@ -132,15 +128,15 @@ function MainPage() {
       params.cuisineType = cuisine;
     }
     if (recipeTime !== 'any') {
-      if (recipeTime == '5 minutes or less') {
+      if (recipeTime === '5 minutes or less') {
         params.time = 5;
-      } else if (recipeTime == '10 minutes or less') {
+      } else if (recipeTime === '10 minutes or less') {
         params.time = 10;
-      } else if (recipeTime == '30 minutes or less') {
+      } else if (recipeTime === '30 minutes or less') {
         params.time = 30;
-      } else if (recipeTime == '1 hour or less') {
+      } else if (recipeTime === '1 hour or less') {
         params.time = 60;
-      } else if (recipeTime == '1 hour or more') {
+      } else if (recipeTime === '1 hour or more') {
         params.time = '60%2B';
       }
     }
@@ -150,8 +146,25 @@ function MainPage() {
       + "app_id=" +
       process.env.REACT_APP_RECIPE_API_ID +
       "&app_key=" +
-      process.env.REACT_APP_RECIPE_API_KEY, { params });
-      console.log(response.data); // Handle the response data as needed
+      process.env.REACT_APP_RECIPE_API_KEY +
+      '&field=' + fields[0] +
+      '&field=' + fields[1] +
+      '&field=' + fields[2] +
+      '&field=' + fields[3] +
+      '&field=' + fields[4] +
+      '&field=' + fields[5] +
+      '&field=' + fields[6] +
+      '&field=' + fields[7] +
+      '&field=' + fields[8] +
+      '&field=' + fields[9] +
+      '&field=' + fields[10], { params });
+      console.log(response.data);
+      setRecipes(response.data.hits);
+      if (response.data.count === 0) {
+        setErrorMessage("No recipes found for the specified requirements");
+        return;
+      }
+      navigate("/recipe", { state: { recipes: response.data.hits } });
     } catch (error) {
       console.error("Error fetching recipes:", error);
     }
@@ -162,7 +175,9 @@ function MainPage() {
     <div>
       <h1 style={{ marginBottom: 40, marginTop: 20 }}>Welcome!</h1>
       <h2 style={{ marginBottom: 40 }}>Generate a Recipe:</h2>
-
+      {errorMessage && (
+        <div style={{ color: "red", marginBottom: "10px" }}>{errorMessage}</div>
+      )}
       <select
         style={{ marginRight: 10, height: 30 }}
         value={course}
@@ -174,6 +189,7 @@ function MainPage() {
         <option value="dinner">Dinner</option>
         <option value="lunch">Lunch</option>
         <option value="snack">Snack</option>
+        <option value="teatime">Tea time</option>
       </select>
 
       <select
