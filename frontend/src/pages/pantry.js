@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import "../css/mainpage.css";
 import axios from "axios";
+import '../css/buttons.css';
 
 const categories = ["Vegetable", "Dairy", "Fruit", "Grain", "Protein", "Other"];
 
@@ -399,7 +399,7 @@ const Pantry = () => {
             <option value="Protein">Protein</option>
             <option value="Other">Other</option>
           </select>
-          <button type="submit">Add</button>
+          <button className="green-button" type="submit">Add</button>
         </div>
       </form>
       <div style={{ display: "flex", justifyContent: "center" }}>
@@ -428,12 +428,13 @@ const Pantry = () => {
                       }}
                     >
                       <button
+                        className = "deleteButton"
                         onClick={() => deletePantryItem(item.id)}
                         style={{ display: "inline" }}
                       >
                         X
                       </button>
-                      <div
+                      <div className="ingredient"
                         onClick={() => handleItemSelection(item)}
                         style={{
                           padding: "10px",
@@ -444,10 +445,9 @@ const Pantry = () => {
                         {item.ingredient_name} - {item.quantity} {item.unit}
                       </div>
                       <button
+                        className="favoriteButton"
                         onClick={() => toggleFavorite(item.id, item.favorite)}
                         style={{
-                          backgroundColor: "transparent",
-                          border: "none",
                           cursor: "pointer",
                         }}
                       >
@@ -477,7 +477,7 @@ const Pantry = () => {
               </h5>
               <br></br>
               <p>
-                Calories: {extractNutritionInfo(nutritionInfo).calories} kcal
+                Calories: {extractNutritionInfo(nutritionInfo).calories} calories
               </p>
               <p>Carbs: {extractNutritionInfo(nutritionInfo).carbs} g</p>
               <p>Fat: {extractNutritionInfo(nutritionInfo).fat} g</p>

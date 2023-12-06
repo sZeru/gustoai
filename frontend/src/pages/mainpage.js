@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "../css/mainpage.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import "../css/buttons.css";
 
 function MainPage() {
   const navigate = useNavigate();
@@ -12,6 +13,20 @@ function MainPage() {
   const [pantryItems, setPantryItems] = useState([]);
   const [errorMessage, setErrorMessage] = useState(null);
   const [recipes, setRecipes] = useState(null);
+
+
+  useEffect(() => {
+    const loadPantryItems = async () => {
+      const items = await fetchPantryItems();
+      const updatedItems = items.map(item => ({
+        ...item,
+        selected: item.favorite ? 1 : 0
+      }));
+      setPantryItems(updatedItems);
+    };
+
+    loadPantryItems();
+  }, []);
 
   const handleCheckboxChange = async (item, isChecked) => {
     try {
@@ -88,14 +103,20 @@ function MainPage() {
     }
   };
 
-  useEffect(() => {
-    const loadPantryItems = async () => {
-      const items = await fetchPantryItems();
-      setPantryItems(items);
-    };
-
-    loadPantryItems();
-  }, []);
+  const fetchRestrictions = async () => {
+    try {
+      const response = await axios.get("http://127.0.0.1:5000/restrictions/get", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      return response.data;
+    }
+      catch (error) {
+        console.error("Error fetching restrictions:", error);
+        return [];
+    }
+  };
 
   const generateRecipe = async () => {
     const selectedIngredients = pantryItems
@@ -112,6 +133,8 @@ function MainPage() {
       }
       
       const fields = ['image', 'source', 'dietLabels', 'ingredients', 'ingredientLines', 'totalTime', 'cuisineType', 'mealType', 'totalNutrients', 'url', 'label', 'uri'];
+      const restrictions = await fetchRestrictions();
+      console.log('restriction', restrictions);
       const ingredientsQuery = selectedIngredients.join(', ');
       const params = {
       q: ingredientsQuery,
@@ -120,7 +143,11 @@ function MainPage() {
       app_key: process.env.REACT_APP_RECIPE_API_KEY,
       ingr: selectedIngredients.length + 1,
       imageSize: 'SMALL',
+      fields: fields.join(',')
     };
+    if (restrictions.length > 0) {
+      params.health = restrictions.join(',');
+    }
     if (course !== 'any') {
       params.mealType = course;
     }
@@ -146,19 +173,7 @@ function MainPage() {
       + "app_id=" +
       process.env.REACT_APP_RECIPE_API_ID +
       "&app_key=" +
-      process.env.REACT_APP_RECIPE_API_KEY +
-      '&field=' + fields[0] +
-      '&field=' + fields[1] +
-      '&field=' + fields[2] +
-      '&field=' + fields[3] +
-      '&field=' + fields[4] +
-      '&field=' + fields[5] +
-      '&field=' + fields[6] +
-      '&field=' + fields[7] +
-      '&field=' + fields[8] +
-      '&field=' + fields[9] +
-      '&field=' + fields[10] +
-      '&field=' + fields[11], { params });
+      process.env.REACT_APP_RECIPE_API_KEY, { params });
       console.log(response.data);
       setRecipes(response.data.hits);
       if (response.data.count === 0) {
@@ -166,15 +181,15 @@ function MainPage() {
         return;
       }
       navigate("/recipe", { state: { recipes: response.data.hits } });
-    } catch (error) {
-      console.error("Error fetching recipes:", error);
+    } catch (error) { 
+      setErrorMessage("No recipes found for the specified requirements");
     }
   };
   
 
   return (
     <div>
-      <h2 style={{ marginBottom: 30, marginTop: 20 }}>Generate a Recipe:</h2>
+      <h2 style={{ marginBottom: 30, marginTop: 20 }}>Generate a Recipe</h2>
       {errorMessage && (
         <div style={{ color: "red", marginBottom: "10px" }}>{errorMessage}</div>
       )}
@@ -238,32 +253,27 @@ function MainPage() {
           Your pantry items:
         </h5>
         <div className="form-check">
-          <div style = {{marginRight: '20px'}}>
-            <button style = {{marginRight: '10px'}}onClick={selectAllItems}>Select All</button>
-            <button onClick={clearAllItems}>Clear All</button>
+          <div style = {{marginRight: '20px',  marginBottom: '20px'}}>
+            <button className="grayButton" style = {{marginRight: '10px'}}onClick={selectAllItems}>Select All</button>
+            <button className="grayButton" onClick={clearAllItems}>Clear All</button>
           </div>
-          <table width="100%" align="center">
-            <tbody>
+          <div className="checkbox-container-main">
               {pantryItems.map((item, index) => (
-                <tr key={index}>
-                  <td>
-                    <div>
+                    <div className="checkbox-item-main" key={index}>
                       <input
                         type="checkbox"
                         id={`checkbox-${index}`}
                         checked={item.selected === 1}
+          
                         onChange={(e) => handleCheckboxChange(item, e.target.checked)}
                       />
                       <label className="form-check-label" htmlFor={`checkbox-${index}`}>
                         <span>&nbsp;&nbsp;&nbsp;{item.ingredient_name} ({item.quantity} {item.unit})</span>
                       </label>
                     </div>
-                  </td>
-                </tr>
               ))}
-            </tbody>
-          </table>
-          <button onClick={generateRecipe}>Generate Recipe</button>
+          </div>
+          <button className="green-button" style ={{marginTop: '10px', marginBottom: '50px'}}onClick={generateRecipe}>Generate Recipe</button>
         </div>
       </div>
     </div>

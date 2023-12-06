@@ -56,5 +56,13 @@ class Recipe(db.Model):
 
         }
 
+class Restriction(db.Model):
+    __tablename__ = 'restrictions'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String(32), db.ForeignKey('users.id'))
+    restriction = db.Column(db.JSON, nullable=False)  # Name of the restriction
+    user = db.relationship('User', backref=db.backref('restrictions', lazy=True))
+
+
 
 

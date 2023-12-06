@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-
 function History() {
 
   const navigate = useNavigate();
@@ -15,8 +14,7 @@ function History() {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
         });
-        console.log(response.data);
-        setRecipes(response.data);
+        setRecipes(response.data.reverse());
       } catch (error) {
         console.error('Error fetching recipes:', error);
       }
@@ -31,7 +29,7 @@ function History() {
 
   return (
     <div>
-      <h1 style={{marginTop: 10, marginBottom: 30}}>Recipe History</h1>
+      <h2 style={{marginTop: 10, marginBottom: 30}}>Recipe History</h2>
       <ul style={{listStyleType: 'none', maxWidth: '30%', margin: '0 auto'}}>
         {recipes.map((recipe, index) => (
           <li key={index} style={{ border: '3px black solid', marginBottom: 15, padding: 20, borderRadius: 15, backgroundColor: '#69b869'}}>
