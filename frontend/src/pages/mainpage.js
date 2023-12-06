@@ -111,7 +111,7 @@ function MainPage() {
         return;
       }
       
-      const fields = ['image', 'source', 'dietLabels', 'ingredients', 'ingredientLines', 'totalTime', 'cuisineType', 'mealType', 'totalNutrients', 'url', 'label'];
+      const fields = ['image', 'source', 'dietLabels', 'ingredients', 'ingredientLines', 'totalTime', 'cuisineType', 'mealType', 'totalNutrients', 'url', 'label', 'uri'];
       const ingredientsQuery = selectedIngredients.join(', ');
       const params = {
       q: ingredientsQuery,
@@ -137,7 +137,7 @@ function MainPage() {
       } else if (recipeTime === '1 hour or less') {
         params.time = 60;
       } else if (recipeTime === '1 hour or more') {
-        params.time = '60%2B';
+        params.time = "60+";
       }
     }
     console.log(params);
@@ -157,7 +157,8 @@ function MainPage() {
       '&field=' + fields[7] +
       '&field=' + fields[8] +
       '&field=' + fields[9] +
-      '&field=' + fields[10], { params });
+      '&field=' + fields[10] +
+      '&field=' + fields[11], { params });
       console.log(response.data);
       setRecipes(response.data.hits);
       if (response.data.count === 0) {
@@ -173,8 +174,7 @@ function MainPage() {
 
   return (
     <div>
-      <h1 style={{ marginBottom: 40, marginTop: 20 }}>Welcome!</h1>
-      <h2 style={{ marginBottom: 40 }}>Generate a Recipe:</h2>
+      <h2 style={{ marginBottom: 30, marginTop: 20 }}>Generate a Recipe:</h2>
       {errorMessage && (
         <div style={{ color: "red", marginBottom: "10px" }}>{errorMessage}</div>
       )}

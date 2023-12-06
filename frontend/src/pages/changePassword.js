@@ -28,7 +28,7 @@ function ChangePassword() {
         setStatusMessage('Error changing password');
       }
     } catch (error) {
-      setStatusMessage('Error: Unable to reach the server');
+      console.error('Error:', error);
     }
   }
 

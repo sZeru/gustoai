@@ -2,6 +2,7 @@ import React, { } from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 
 import LoginPage from './pages/login';
@@ -16,8 +17,10 @@ import Profile from './pages/profile';
 import useToken from './useToken';
 import ProtectedRoute from './ProtectedRoute';
 import ChangePassword from './pages/changePassword';
+import ChangeUsername from './pages/changeUsername';
 import Recipe from './pages/recipe';
 import RecipeDetails from './pages/recipeDetails';
+import Favorite from './pages/favorites';
 
 function App() {
   const { removeToken, setToken } = useToken();
@@ -35,8 +38,10 @@ function App() {
                     <Route path="/history" element={<ProtectedRoute> <History /> </ProtectedRoute>} />
                     <Route path="/profile" element={<ProtectedRoute><Profile removeToken={removeToken} /></ProtectedRoute>} />
                     <Route path="/changePassword" element ={<ProtectedRoute> <ChangePassword /> </ProtectedRoute>} />
+                    <Route path ="/changeUsername" element ={<ProtectedRoute> <ChangeUsername /> </ProtectedRoute>} />
                     <Route path="/recipe" element ={<ProtectedRoute> <Recipe /> </ProtectedRoute>} />
                     <Route path="/recipeDetails" element ={<ProtectedRoute> <RecipeDetails /> </ProtectedRoute>} />
+                    <Route path="/favorite" element ={<ProtectedRoute> <Favorite /> </ProtectedRoute>} />
 
                 </Routes>
             </div>

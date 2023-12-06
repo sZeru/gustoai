@@ -22,11 +22,10 @@ function Profile({ removeToken }) {
 
   return (
     <div style={styles.container}>
-      <h1>Profile</h1>
-
-      <button onClick={logMeOut} style={styles.button}>Logout</button>
+      <h1>Profile</h1><br></br>
       <button onClick={changePagePass} style={styles.button}>Edit Password</button>
-      <button onClick={changePageUser} style={styles.button}>Edit Username</button>
+      <button onClick={changePageUser} style={styles.button}>Edit Username</button><br></br>
+      <button onClick={logMeOut} style={{marginTop: 10, ...styles.logout_button}}>Logout</button>
     </div>
   );
 }
@@ -42,6 +41,15 @@ const styles = {
   },
   button: {
     backgroundColor: '#4caf50',
+    color: 'white',
+    padding: '10px 15px',
+    border: 'none',
+    borderRadius: '3px',
+    cursor: 'pointer',
+    marginRight: '8px',
+  },
+  logout_button: {
+    backgroundColor: '#ed4040',
     color: 'white',
     padding: '10px 15px',
     border: 'none',

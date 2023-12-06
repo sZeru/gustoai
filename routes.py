@@ -1,7 +1,7 @@
 from flask import jsonify, request
 from flask_jwt_extended import create_access_token, get_current_user, get_jwt,get_jwt_identity, unset_jwt_cookies, jwt_required, JWTManager
 import mysqlx
-from model import PantryItem, db, User
+from model import PantryItem, db, User, Recipe
 from __init__ import app
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -137,16 +137,12 @@ def changePassword():
     try:
         # Extract JSON data from the request
         data = request.json
-
         # Get the user ID from the JWT token
         current_user_id = get_jwt_identity()
-
         # Retrieve the user from the database based on the user ID
         user = User.query.get(current_user_id)
-
         # Update the user's password
         user.password = data['new_password']
-
         hashed_password = generate_password_hash( user.password)
         user.password = hashed_password
         # Commit the changes to the database
@@ -169,19 +165,13 @@ def changeUsername():
     try:
         # Extract JSON data from the request
         data = request.json
-
         # Get the user ID from the JWT token
         current_user_id = get_jwt_identity()
-
         # Retrieve the user from the database based on the user ID
         user = User.query.get(current_user_id)
-
         user.username = data['new_Username']
-
-
         # Commit the changes to the database
         db.session.commit()
-
         # Return a success response
         return jsonify({"success": True, "response": "Username updated"}), 200
 
@@ -228,3 +218,68 @@ def bulk_update_pantry_items():
         return jsonify({"success": True, "message": "Items updated"}), 200
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
+    
+@app.route('/recipe', methods=['POST'])
+@jwt_required()
+def add_or_update_recipe():
+    user_id = get_jwt_identity()
+    recipe_data = request.json.get('recipe_data')
+    favorited = request.json.get('favorited', False)
+    print(favorited)
+    recipe_uri = recipe_data.get('recipe').get('uri')
+    print(recipe_uri)
+
+    # Check if the recipe already exists for the user
+    existing_recipe = Recipe.query.filter_by(
+        user_id=user_id, 
+        recipe_uri=recipe_uri
+    ).first()
+    print(existing_recipe)
+    if existing_recipe:
+        # Update the existing recipe
+        existing_recipe.recipe_data = recipe_data
+        print(favorited)
+        existing_recipe.favorited = favorited
+        db.session.commit()
+        return jsonify(existing_recipe.to_dict()), 200
+    else:
+        # Add a new recipe
+        new_recipe = Recipe(
+            user_id=user_id,
+            recipe_data=recipe_data,
+            favorited=favorited,
+            recipe_uri=recipe_uri
+        )
+        db.session.add(new_recipe)
+    
+    db.session.commit()
+    return jsonify({"message": "Recipe saved successfully"}), 200
+
+#get all recipes
+@app.route('/recipe/get', methods=['GET'])
+@jwt_required()
+def get_recipes():
+    user_id = get_jwt_identity()
+    recipes = Recipe.query.filter_by(user_id=user_id).all()
+    return jsonify([recipe.to_dict() for recipe in recipes])
+
+#get all favorited recipes
+@app.route('/recipe/getFav', methods=['GET'])
+@jwt_required()
+def get_favorites():
+    user_id = get_jwt_identity()
+    recipes = Recipe.query.filter_by(user_id=user_id, favorited=True).all()
+    print([recipe.to_dict() for recipe in recipes])
+    return jsonify([recipe.to_dict() for recipe in recipes])
+
+@app.route('/recipe/favorite-status', methods=['GET'])
+@jwt_required()
+def get_favorite_status():
+    user_id = get_jwt_identity()
+    recipe_uri = request.args.get('recipeUri')
+    
+    recipe = Recipe.query.filter_by(user_id=user_id, recipe_uri=recipe_uri).first()
+    if recipe:
+        return jsonify(favorited=recipe.favorited)
+    else:
+        return jsonify({"message": "Recipe not found"}), 404
