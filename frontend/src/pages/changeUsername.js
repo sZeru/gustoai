@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 function ChangeUsername() {
   const [newUsername, setNewUsername] = useState('');
   const [statusMessage, setStatusMessage] = useState('');
-  const navigateBack = useNavigate();
+  const navigate = useNavigate();
 
 
   const handleChangeUsername = async () => {
@@ -32,6 +32,10 @@ function ChangeUsername() {
       console.error('Error:', error);
     }
   }
+
+  const navigateBack = () => {
+    navigate('/profile');
+  };
 
   return (
     <div style={styles.container}>
