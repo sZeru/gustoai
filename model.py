@@ -37,5 +37,24 @@ class PantryItem(db.Model):
             "favorite": self.favorite,
             "selected": self.selected
         }
+    
+class Recipe(db.Model):
+    __tablename__ = 'recipes'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String(32), db.ForeignKey('users.id'))
+    recipe_data = db.Column(db.JSON, nullable=False)
+    favorited = db.Column(db.Boolean, default=False)
+    recipe_uri = db.Column(db.String(255), nullable=False)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "recipe_data": self.recipe_data,
+            "favorited": self.favorited,
+            "recipe_uri": self.recipe_uri
+
+        }
+
 
 
