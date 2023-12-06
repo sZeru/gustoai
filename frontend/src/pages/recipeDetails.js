@@ -96,7 +96,7 @@
                     <li>Sodium: {nutritionInfo.sodium}</li>
                     <li>Cholesterol: {nutritionInfo.cholesterol}</li>
                 </ul>
-                <button onClick={() => handleToggleFavorite()}>{isFavorited ? "★" : "☆"}</button>
+                <button style={{color: 'orange'}}onClick={() => handleToggleFavorite()}>{isFavorited ? "★" : "☆"}</button>
                 <button onClick={() => handleCookRecipe(recipe)}>Cook Recipe</button>
 
             </div>

@@ -1,7 +1,7 @@
 from flask import jsonify, request
 from flask_jwt_extended import create_access_token, get_current_user, get_jwt,get_jwt_identity, unset_jwt_cookies, jwt_required, JWTManager
 import mysqlx
-from model import PantryItem, db, User, Recipe
+from model import PantryItem, db, User, Recipe, Restriction
 from __init__ import app
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -283,3 +283,37 @@ def get_favorite_status():
         return jsonify(favorited=recipe.favorited)
     else:
         return jsonify({"message": "Recipe not found"}), 404
+    
+# Update user dietary restrictions
+@app.route('/restrictions/update', methods=['POST'])
+@jwt_required()
+def update_dietary_restrictions():
+    user_id = get_jwt_identity()
+    restrictions = request.json.get('restrictions', [])  # List of restriction names
+    print(restrictions)
+
+    # Find or create a new Restriction object for the user
+    user_restriction = Restriction.query.filter_by(user_id=user_id).first()
+    if not user_restriction:
+        user_restriction = Restriction(user_id=user_id)
+        db.session.add(user_restriction)
+
+    # Update the restrictions
+    user_restriction.restriction = restrictions
+
+    try:
+        db.session.commit()
+        return jsonify({"message": "Dietary restrictions updated successfully"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+    
+@app.route('/restrictions/get', methods=['GET'])
+@jwt_required()
+def get_dietary_restrictions():
+    user_id = get_jwt_identity()
+    user_restriction = Restriction.query.filter_by(user_id=user_id).first()
+    print("restriction", user_restriction.restriction)
+    if not user_restriction:
+        return jsonify({"message": "No dietary restrictions found"}), 404
+    return jsonify(user_restriction.restriction), 200

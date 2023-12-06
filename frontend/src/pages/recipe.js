@@ -7,10 +7,15 @@ function Recipe(){
     const navigate = useNavigate();
     const recipes = location.state?.recipes || [];
     console.log(recipes)
+    const navigateBack = () => {
+      navigate(-1);
+  };
+
  
   return (
     <div>
-      <div className="recipes-container">
+        <button onClick={navigateBack}>Back</button>
+x       <div className="recipes-container">
       {recipes.map((recipe, index) => (
         <div key={index}>
             <RecipeCard key={index} recipe={recipe} />

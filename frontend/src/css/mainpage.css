@@ -14,4 +14,26 @@
     background-color: green;
     color: white;
   }
+
+  .checkbox-container-main {
+    border: 1px solid black;
+    padding: 10px;
+    padding-left: 70px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    border-radius: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    max-width: 700px;
+    margin: auto;
+    background-color: rgb(222, 245, 224)
+  }
+  
+  .checkbox-item-main {
+    text-align: left;
+    flex-basis: calc(50% - 2px); 
+    margin: 1px;
+    box-sizing: border-box;
+  }
   

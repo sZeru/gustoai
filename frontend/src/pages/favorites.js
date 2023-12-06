@@ -16,7 +16,7 @@ function Favorite() {
             },
           });
             console.log(response.data);
-          setFavoriteRecipes(response.data);
+          setFavoriteRecipes(response.data.reverse());
         } catch (error) {
           console.error('Error fetching recipes:', error);
         }
@@ -56,7 +56,7 @@ function Favorite() {
   
     return (
       <div>
-        <h1 style={{marginTop: 10, marginBottom: 30}}>Favorited Recipes</h1>
+        <h2 style={{marginTop: 10, marginBottom: 30}}>Favorited Recipes</h2>
         <ul style={{listStyleType: 'none', maxWidth: '30%', margin: '0 auto'}}>
           {favoriteRecipes.map((recipe, index) => (
             <li key={index} style={{ border: '3px black solid', marginBottom: 15, padding: 20, borderRadius: 15, backgroundColor: '#edd980'}}>
