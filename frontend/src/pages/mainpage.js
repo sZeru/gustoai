@@ -16,6 +16,19 @@ function MainPage() {
 
 
   useEffect(() => {
+    const fetchPantryItems = async () => {
+      try {
+        const response = await axios.get("http://127.0.0.1:5000/pantry", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        return response.data;
+      } catch (error) {
+        console.error("Error fetching pantry item names:", error);
+        return [];
+      }
+    };
     const loadPantryItems = async () => {
       const items = await fetchPantryItems();
       const updatedItems = items.map(item => ({
@@ -89,19 +102,7 @@ function MainPage() {
 
   };
 
-  const fetchPantryItems = async () => {
-    try {
-      const response = await axios.get("http://127.0.0.1:5000/pantry", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching pantry item names:", error);
-      return [];
-    }
-  };
+ 
 
   const fetchRestrictions = async () => {
     try {

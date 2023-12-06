@@ -15,7 +15,8 @@ function Recipe(){
   return (
     <div>
         <button onClick={navigateBack}>Back</button>
-x       <div className="recipes-container">
+               <div className="recipes-container">
+<div className="recipes-container">
       {recipes.map((recipe, index) => (
         <div key={index}>
             <RecipeCard key={index} recipe={recipe} />
