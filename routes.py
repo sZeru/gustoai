@@ -1,9 +1,11 @@
+from datetime import date, datetime
 from flask import jsonify, request
 from flask_jwt_extended import create_access_token, get_current_user, get_jwt,get_jwt_identity, unset_jwt_cookies, jwt_required, JWTManager
 import mysqlx
-from model import PantryItem, db, User, Recipe, Restriction
+from model import PantryItem, db, User, Recipe, Restriction, NutritionGoal, DailyIntake
 from __init__ import app
 from werkzeug.security import generate_password_hash, check_password_hash
+import pytz
 
 
 @app.route("/mainpage", methods=["GET", "POST"])
@@ -317,3 +319,102 @@ def get_dietary_restrictions():
     if not user_restriction:
         return jsonify({"message": "No dietary restrictions found"}), 404
     return jsonify(user_restriction.restriction), 200
+
+@app.route('/nutrition/goal', methods=['GET'])
+@jwt_required()
+def get_nutrition_goal():
+    user_id = get_jwt_identity()
+    goal = NutritionGoal.query.filter_by(user_id=user_id).first()
+    print(goal)
+    if goal:
+        return jsonify(goal.serialize())
+    else:
+        return jsonify({}), 404
+
+@app.route('/nutrition/goal', methods=['POST'])
+@jwt_required()
+def set_nutrition_goal():
+    user_id = get_jwt_identity()
+    data = request.json
+    print(data)
+    goal = NutritionGoal.query.filter_by(user_id=user_id).first()
+    if goal:
+        # Update existing goal
+        goal.weight = data.get('weight')
+        goal.calories = data.get('calories')
+        goal.carbs = data.get('carbs')
+        goal.fat = data.get('fat')
+        goal.protein = data.get('protein')
+        goal.sugar = data.get('sugar')
+        goal.sodium = data.get('sodium')
+        goal.cholesterol = data.get('cholesterol')
+        goal.last_updated = datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(pytz.timezone('America/Los_Angeles')).strftime('%Y-%m-%d')
+    else:
+        goal = NutritionGoal(
+            user_id=user_id,
+            weight=data.get('weight'),
+            calories=data.get('calories'),
+            carbs = data.get('carbs'),
+            fat = data.get('fat'),
+            protein = data.get('protein'),
+            sugar = data.get('sugar'),
+            sodium = data.get('sodium'),
+            cholesterol = data.get('cholesterol'),
+            last_updated = datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(pytz.timezone('America/Los_Angeles')).strftime('%Y-%m-%d')
+        )
+        db.session.add(goal)
+
+    db.session.commit()
+    return jsonify({"message": "Nutrition goal updated successfully"}), 200
+
+@app.route('/nutrition/intake', methods=['POST'])
+@jwt_required()
+def add_daily_intake():
+    user_id = get_jwt_identity()
+    data = request.json
+    date = datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(pytz.timezone('America/Los_Angeles')).strftime('%Y-%m-%d')
+
+    intake = DailyIntake.query.filter_by(user_id=user_id, date=date).first()
+    if intake:
+        intake.calories += data.get('calories', 0)
+        intake.carbs += data.get('carbs', 0)
+        intake.fat += data.get('fat', 0)
+        intake.protein += data.get('protein', 0)
+        intake.sugar += data.get('sugar', 0)
+        intake.sodium += data.get('sodium', 0)
+        intake.cholesterol += data.get('cholesterol', 0)
+    else:
+        intake = DailyIntake(
+            user_id=user_id,
+            date=date,
+            weight = 0,
+            calories=data.get('calories', 0),
+            carbs=data.get('carbs', 0),
+            fat=data.get('fat', 0),
+            protein=data.get('protein', 0),
+            sugar=data.get('sugar', 0),
+            sodium=data.get('sodium', 0),
+            cholesterol=data.get('cholesterol', 0)
+        )
+        db.session.add(intake)
+
+    db.session.commit()
+    return jsonify({"message": "Daily intake updated successfully"}), 200
+
+
+@app.route('/nutrition/intake/<date>', methods=['GET'])
+@jwt_required()
+def get_daily_intake(date):
+    user_id = get_jwt_identity()
+    try:
+        date_obj = datetime.strptime(date, '%Y-%m-%d').date()
+        print(date_obj)
+    except ValueError:
+        return jsonify({"message": "Invalid date format"}), 400
+
+    intake = DailyIntake.query.filter_by(user_id=user_id, date=date_obj).first()
+    if intake:
+        return jsonify(intake.serialize())
+    else:
+        return jsonify({"message": "No intake found for this date"}), 404
+

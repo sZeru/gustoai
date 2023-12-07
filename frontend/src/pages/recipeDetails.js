@@ -18,6 +18,16 @@
             cholesterol: Math.round(nutrients.CHOLE?.quantity.toFixed(2)) + ' ' + nutrients.CHOLE?.unit
         };
 
+        const extractInfo = {
+            calories: Math.round(nutrients.ENERC_KCAL?.quantity),
+            carbs: Math.round(nutrients.CHOCDF?.quantity.toFixed(2)),
+            fat: Math.round(nutrients.FAT?.quantity.toFixed(2)),
+            protein: Math.round(nutrients.PROCNT?.quantity.toFixed(2)),
+            sugar: Math.round(nutrients.SUGAR?.quantity.toFixed(2)),
+            sodium: Math.round(nutrients.NA?.quantity.toFixed(2)),
+            cholesterol: Math.round(nutrients.CHOLE?.quantity.toFixed(2))
+        }
+
         const [isFavorited, setIsFavorited] = useState(false);
 
         useEffect(() => {
@@ -51,6 +61,11 @@
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
+            });
+            await axios.post('http://127.0.0.1:5000/nutrition/intake', extractInfo, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
             });
             console.log(localStorage.getItem("token"));
             window.open(recipe.recipe.url, "_blank")
