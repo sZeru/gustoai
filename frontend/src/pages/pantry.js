@@ -320,8 +320,8 @@ const Pantry = () => {
 
   return (
     <div>
-      <h1 style={{ marginBottom: "35px" }}>My Pantry</h1>
-      <h5 style={{ marginBottom: "10px" }}>Add ingredient</h5>
+      <h2 style={{ marginBottom: "35px" }}>My Pantry</h2>
+      <h4 style={{ marginBottom: "10px" }}>Add ingredient</h4>
 
       {errorMessage && (
         <div style={{ color: "red", marginBottom: "10px" }}>{errorMessage}</div>

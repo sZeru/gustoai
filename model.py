@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from uuid import uuid4
 from __init__ import db
@@ -60,8 +61,67 @@ class Restriction(db.Model):
     __tablename__ = 'restrictions'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.String(32), db.ForeignKey('users.id'))
-    restriction = db.Column(db.JSON, nullable=False)  # Name of the restriction
+    restriction = db.Column(db.JSON, nullable=False)
     user = db.relationship('User', backref=db.backref('restrictions', lazy=True))
+
+class NutritionGoal(db.Model):
+    __tablename__ = 'nutrition_goals'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String(32), db.ForeignKey('users.id'))
+    last_updated = db.Column(db.DateTime, default=datetime.utcnow)
+    weight = db.Column(db.Integer)
+    calories = db.Column(db.Integer)
+    carbs = db.Column(db.Integer)
+    fat = db.Column(db.Integer)
+    protein = db.Column(db.Integer)
+    sugar = db.Column(db.Integer)
+    sodium = db.Column(db.Integer)
+    cholesterol = db.Column(db.Integer)
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "weight": self.weight,
+            "calories": self.calories,
+            "carbs": self.carbs,
+            "fat": self.fat,
+            "protein": self.protein,
+            "sugar": self.sugar,
+            "sodium": self.sodium,
+            "cholesterol": self.cholesterol,
+            "last_updated": self.last_updated.strftime("%Y-%m-%d")
+        }
+
+class DailyIntake(db.Model):
+    __tablename__ = 'daily_intakes'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String(32), db.ForeignKey('users.id'))
+    weight = db.Column(db.Integer)
+    date = db.Column(db.Date)
+    calories = db.Column(db.Integer)
+    carbs = db.Column(db.Integer)
+    fat = db.Column(db.Integer)
+    protein = db.Column(db.Integer)
+    sugar = db.Column(db.Integer)
+    sodium = db.Column(db.Integer)
+    cholesterol = db.Column(db.Integer)
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "date": self.date.strftime("%Y-%m-%d") if self.date else None,
+            "calories": self.calories,
+            "carbs": self.carbs,
+            "fat": self.fat,
+            "protein": self.protein,
+            "sugar": self.sugar,
+            "sodium": self.sodium,
+            "cholesterol": self.cholesterol
+            # Add other fields if necessary
+        }
+
+
+
 
 
 
