@@ -24,14 +24,24 @@ function ChangeUsername() {
       console.log('Response:', response.status, response.statusText);
   
       if (response.status === 200) {
+        console.log('Username changed successfully!');
         setStatusMessage('Password changed successfully!');
       } else {
-        setStatusMessage('Error changing password');
+        console.log('Already Taken Username');
+        setStatusMessage('This username has already been taken. Please choose a different one');
       }
     } catch (error) {
       console.error('Error:', error);
+
+      if (error.isAxiosError) {
+        const errorMessage = error.response.data.response || 'An error occurred.';
+        setStatusMessage(errorMessage);
+      } else {
+        setStatusMessage('An unexpected error occurred.');
+      }
     }
   }
+
 
   const navigateBack = () => {
     navigate('/profile');
