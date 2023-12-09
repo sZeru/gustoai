@@ -6,7 +6,7 @@ This website is designed to streamline the search for a recipe that works for yo
 
 When you are logged in, you provide GustoAI with all the contents of your pantry in the "Pantry" tab. In the "Diet Restriction" tab you provide gustoAI with dietary restrictions and allergies to filter out recipes that are not suitable for your health. Set nutritional goals on the "My Progress" tab that the website will automatically track for you. The mainpage - shown on the navigation bar as our logo - is where you generate the recipes! Go there and fill out the cuisine, course, cooking duration, and select which of your pantry ingredients to use. Click 'Generate Recipe' and see what you can make!
 
-![GustoAI Logo](https://doc-0c-28-docs.googleusercontent.com/docs/securesc/ha0ro937gcuc7l7deffksulhg5h7mbp1/676fe2n48k22a10btgtvrqq5ohl1m1hd/1702153125000/05808489981707767300/*/1mZUqACEgvmxyBZqWnib_bFRfd6PLBvzW?uuid=1503dc23-dc97-4b66-89f1-06275283b5e8)
+![GustoAI Logo](https://drive.google.com/uc?id=1mZUqACEgvmxyBZqWnib_bFRfd6PLBvzW)
 
 
 ## Installation Guide: ##
