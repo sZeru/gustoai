@@ -142,7 +142,7 @@ function MainPage() {
       type: 'public',
       app_id: process.env.REACT_APP_RECIPE_API_ID,
       app_key: process.env.REACT_APP_RECIPE_API_KEY,
-      ingr: selectedIngredients.length + 1,
+      ingr: selectedIngredients.length + 5,
       imageSize: 'SMALL',
       fields: fields.join(',')
     };
@@ -259,6 +259,7 @@ function MainPage() {
             <button className="grayButton" onClick={clearAllItems}>Clear All</button>
           </div>
           <div className="checkbox-container-main">
+            {pantryItems.length === 0 ? <h4>No items in pantry, add some in the "Pantry" section!</h4> : null}
               {pantryItems.map((item, index) => (
                     <div className="checkbox-item-main" key={index}>
                       <input

@@ -413,8 +413,38 @@ def get_daily_intake(date):
         return jsonify({"message": "Invalid date format"}), 400
 
     intake = DailyIntake.query.filter_by(user_id=user_id, date=date_obj).first()
+    print(intake)
     if intake:
         return jsonify(intake.serialize())
     else:
-        return jsonify({"message": "No intake found for this date"}), 404
+        intake = DailyIntake(
+            user_id=user_id,
+            date=date,
+            weight = 0,
+            calories=0,
+            carbs=0,
+            fat=0,
+            protein=0,
+            sugar=0,
+            sodium=0,
+            cholesterol=0
+        )
+        db.session.add(intake)
+        db.session.commit()
+        return jsonify(intake.serialize())
 
+@app.route('/pantry/<int:item_id>', methods=['PATCH'])
+@jwt_required()
+def update_pantry_item(item_id):
+    current_user_id = get_jwt_identity()
+    data = request.json
+
+    item_to_update = PantryItem.query.filter_by(id=item_id, user_id=current_user_id).first()
+    
+    if item_to_update:
+        item_to_update.quantity = data.get('quantity', item_to_update.quantity)
+        item_to_update.unit = data.get('unit', item_to_update.unit)
+        db.session.commit()
+        return jsonify({'message': 'Item updated successfully'}), 200
+    else:
+        return jsonify({'message': 'Item not found'}), 404
