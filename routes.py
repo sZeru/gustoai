@@ -137,24 +137,24 @@ def toggle_favorite(item_id):
 def changePassword():
 
     try:
-        # Extract JSON data from the request
+
         data = request.json
-        # Get the user ID from the JWT token
+      
         current_user_id = get_jwt_identity()
-        # Retrieve the user from the database based on the user ID
+        
         user = User.query.get(current_user_id)
-        # Update the user's password
+       
         user.password = data['new_password']
         hashed_password = generate_password_hash( user.password)
         user.password = hashed_password
-        # Commit the changes to the database
+       
         db.session.commit()
 
-        # Return a success response
+       
         return jsonify({"success": True, "response": "Password updated"}), 200
 
     except Exception as e:
-        # Handle any exceptions that might occur
+      
         print("Error:", str(e))
         return jsonify({"success": False, "response": str(e)}), 500 
 
@@ -165,20 +165,26 @@ def changePassword():
 def changeUsername():
 
     try:
-        # Extract JSON data from the request
+       
         data = request.json
-        # Get the user ID from the JWT token
+    
         current_user_id = get_jwt_identity()
-        # Retrieve the user from the database based on the user ID
+       
         user = User.query.get(current_user_id)
+
+        existing_user = User.query.filter_by(username=data['new_Username']).first()
+
+        if existing_user:
+            return jsonify({"success": False, "response": "Username already exists, please enter a new one"}), 400
+        
         user.username = data['new_Username']
-        # Commit the changes to the database
+       
         db.session.commit()
-        # Return a success response
+      
         return jsonify({"success": True, "response": "Username updated"}), 200
 
     except Exception as e:
-        # Handle any exceptions that might occur
+       
         print("Error:", str(e))
         return jsonify({"success": False, "response": str(e)}), 500
 
