@@ -1,6 +1,6 @@
 # GustoAI #
 
-![GustoAI Logo](https://doc-0c-28-docs.googleusercontent.com/docs/securesc/ha0ro937gcuc7l7deffksulhg5h7mbp1/676fe2n48k22a10btgtvrqq5ohl1m1hd/1702153125000/05808489981707767300/*/1mZUqACEgvmxyBZqWnib_bFRfd6PLBvzW?uuid=1503dc23-dc97-4b66-89f1-06275283b5e8)
+<img src="https://doc-0c-28-docs.googleusercontent.com/docs/securesc/ha0ro937gcuc7l7deffksulhg5h7mbp1/676fe2n48k22a10btgtvrqq5ohl1m1hd/1702153125000/05808489981707767300/*/1mZUqACEgvmxyBZqWnib_bFRfd6PLBvzW?uuid=1503dc23-dc97-4b66-89f1-06275283b5e8" alt="GustoAI Logo" width="300"/>
 
 ## A website that generates recipes for users based on pantry and diet. ##
 
