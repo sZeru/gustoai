@@ -59,3 +59,36 @@
 .grayButton:hover {
     background-color: gray; /* Replace with the hover background color */
 }
+
+.unfavButton {
+    background-color: lightgray;
+    color: black; 
+    border-radius: 5px;
+    padding: 4px 10px;
+    border: 1px solid black; 
+    cursor: pointer;
+    font-size: 17px;
+}
+
+.unfavButton:hover {
+    background-color: darkgoldenrod;
+}
+
+.inputField {
+    padding: 9px;
+    margin: 5px;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    width: 30%;
+  }
+  
+  .selectField {
+    padding: 7px;
+    margin: 5px;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    background-color: white;
+    width: 35%;
+    height: 45px;
+  }
+  

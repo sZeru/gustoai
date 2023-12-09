@@ -22,7 +22,6 @@ import Recipe from './pages/recipe';
 import RecipeDetails from './pages/recipeDetails';
 import Favorite from './pages/favorites';
 import NutritionGoals from './pages/NutritionGoals';
-import DailyProgress from './pages/DailyProgress';
 
 function App() {
   const { removeToken, setToken } = useToken();
@@ -45,10 +44,6 @@ function App() {
                     <Route path="/recipeDetails" element ={<ProtectedRoute> <RecipeDetails /> </ProtectedRoute>} />
                     <Route path="/favorite" element ={<ProtectedRoute> <Favorite /> </ProtectedRoute>} />
                     <Route path="/goal" element ={<ProtectedRoute> <NutritionGoals /> </ProtectedRoute>} />
-                    <Route path="/progress" element ={<ProtectedRoute> <DailyProgress /> </ProtectedRoute>} />
-
-
-
                 </Routes>
             </div>
         </BrowserRouter>
