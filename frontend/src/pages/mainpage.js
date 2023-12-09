@@ -142,7 +142,7 @@ function MainPage() {
       type: 'public',
       app_id: process.env.REACT_APP_RECIPE_API_ID,
       app_key: process.env.REACT_APP_RECIPE_API_KEY,
-      ingr: selectedIngredients.length + 5,
+      ingr: selectedIngredients.length + 1,
       imageSize: 'SMALL',
       fields: fields.join(',')
     };
