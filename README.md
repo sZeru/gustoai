@@ -1,10 +1,14 @@
-# gustoai #
+# GustoAI #
+
+![GustoAI Logo](https://drive.google.com/file/d/1mZUqACEgvmxyBZqWnib_bFRfd6PLBvzW/view?usp=sharing)
 
 ## A website that generates recipes for users based on pantry and diet. ##
 
 This website is designed to streamline the search for a recipe that works for you. There are many difficulties that a cook encounters when trying to find a recipe online, such as website navigation, missing ingredients, dietary restrictions, time available, and a lack of nutritional information. GustoAI is designed to overcome these difficulties and make finding recipes that suit your needs as easy as possible!
 
 When you are logged in, you provide GustoAI with all the contents of your pantry in the "Pantry" tab. In the "Diet Restriction" tab you provide gustoAI with dietary restrictions and allergies to filter out recipes that are not suitable for your health. Set nutritional goals on the "My Progress" tab that the website will automatically track for you. The mainpage - shown on the navigation bar as our logo - is where you generate the recipes! Go there and fill out the cuisine, course, cooking duration, and select which of your pantry ingredients to use. Click 'Generate Recipe' and see what you can make!
+
+![GustoAI Mainpage](https://drive.google.com/file/d/15D7NRRxfLSzBnzRjoEVu_R8_W4Yhe0jE/view?usp=sharing)
 
 
 ## Installation Guide: ##
